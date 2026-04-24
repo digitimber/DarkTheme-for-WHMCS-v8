@@ -1,0 +1,34 @@
+/* ==========================================================================
+   DigiTimber DarkTheme (DTDT) - Your custom overrides
+
+   Any CSS placed in this file will be loaded AFTER dark-blend.css on every
+   admin page (assuming dark mode is active). Use this for your own tweaks
+   that should survive module updates - this file is never overwritten on
+   upgrade.
+
+   NOTE: When the dark/light toggle is enabled, custom.css loads in BOTH
+   modes (dark and light). If you want rules that only apply in dark mode,
+   scope them based on the presence of the dark stylesheet. The dark
+   stylesheet has id="dtdt-css" so you can use a :has selector:
+
+     body:has(link#dtdt-css) .my-element {
+         color: var(--color-text-strong);
+     }
+
+   Or simply reference the CSS tokens - they only resolve when dark-blend.css
+   is loaded, so rules using `var(--color-dark-2)` etc. naturally only apply
+   in dark mode.
+
+   Examples:
+
+     .my-custom-hook {
+         background: var(--color-dark-3);
+     }
+
+     Override a specific token globally:
+     :root {
+         --color-link: #7dd3fc;
+     }
+
+   Tokens you can reuse are defined at the top of dark-blend.css.
+   ========================================================================== */

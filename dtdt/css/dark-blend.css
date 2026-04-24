@@ -1,0 +1,2873 @@
+/***************************************************************************
+ *                                                                         *
+ *  Blend Dark Mode - Optimized                                            *
+ *  Original: WevrLabs Hosting (github.com/WevrLabs-Group)                 *
+ *  Maintained locally for Digitimber WHMCS 8.x                            *
+ *                                                                         *
+ *  License: GPL-3.0-or-later. See LICENSE in the module root.             *
+ *                                                                         *
+ *  Structure:                                                             *
+ *    1. CSS variables (single source of truth for the palette)            *
+ *    2. Base elements (body, headings, hr, links, inputs)                 *
+ *    3. Layout (header, sidebar, content, footer)                         *
+ *    4. Navigation (main nav, admin/client tabs, intellisearch)           *
+ *    5. Tables (generic, form, datatable, clientssummarystats)            *
+ *    6. Forms (inputs, selectize, bootstrap-switch)                       *
+ *    7. Cards & panels (panel, well, popover, tooltip, modal)             *
+ *    8. Alerts, labels, badges                                            *
+ *    9. Buttons                                                           *
+ *   10. Dashboard & widgets                                               *
+ *   11. Tickets                                                           *
+ *   12. System settings, apps & integrations                              *
+ *   13. Date picker                                                       *
+ *   14. Misc / 3rd-party modules (layers, rs-module, google charts,       *
+ *       wbavatax, etc)                                                    *
+ *                                                                         *
+ ***************************************************************************/
+
+/* =====================================================================
+   1. CSS VARIABLES
+   --------------------------------------------------------------------- */
+
+:root {
+    /* ---- Surface ladder (darks, lightest = highest number) ---- */
+    --color-dark:    #000;
+    --color-dark-1:  #0a0a0a;
+    --color-dark-2:  #151515;
+    --color-dark-3:  #1c1c1c;
+    --color-dark-4:  #232323;
+    --color-dark-5:  #2a2a2a;
+    --color-dark-6:  #313131;
+
+    /* ---- Borders ---- */
+    --color-border:      #3a3a3a;
+    --color-border-2:    #484848;
+
+    /* ---- Text ---- */
+    --color-text:        #cccccc;
+    --color-text-dim:    #999999;
+    --color-text-strong: #eeeeee;
+    --color-text-muted:  #888888;
+    --color-heading:     #ababab;
+    --color-white:       #fff;       /* for the few places we truly want pure white */
+
+    /* ---- Links / accent ---- */
+    --color-link:        #9cd;
+    --color-link-hover:  #cef;
+    --color-blue:        #1b4d80;
+    --color-blue-2:      #133e69;
+    --color-blue-3:      #25659c;
+
+    /* ---- Gray accents ---- */
+    --color-gray:        #888;
+    --color-gray-2:      #ddd;
+
+    /* ---- Accent greens (for success buttons, confirm actions) ---- */
+    --color-green:       #307d48;
+    --color-green-2:     #27653a;
+
+    /* ---- Status surface/text tokens ---------------------------------
+       Used for inline-styled WHMCS status rows (service tables, selectize
+       items, etc) and for Bootstrap contextual classes (.danger, .success,
+       .warning, .info). Backgrounds are deeply muted, text is pastel, and
+       link colors are slightly brighter than the text so they stand out. */
+
+    /* Red / danger - terminated, cancelled, fraud, completed */
+    --status-red-bg:     #4a2525;
+    --status-red-text:   #f0c8c8;
+    --status-red-link:   #ff9090;
+
+    /* Green / success - suspended (and legacy active/paid) */
+    --status-green-bg:   #254a25;
+    --status-green-text: #c8f0c8;
+    --status-green-link: #a0e8a0;
+
+    /* Yellow / warning - pending */
+    --status-yellow-bg:   #4a3d1a;
+    --status-yellow-text: #f0dba0;
+
+    /* Blue / info - informational rows, EFF2F9 inset areas */
+    --status-blue-bg:    #1f3a4a;
+    --status-blue-text:  #c0dcef;
+
+    /* Cream / notice - support center, system support request boxes */
+    --status-cream-bg:   #3a331f;
+    --status-cream-text: #dbcc9a;
+
+    /* Muted - completed/terminated dimmed rendering */
+    --status-muted-bg:   #2e2e2e;
+    --status-muted-text: #888888;
+
+    /* ---- Alert / label semantic tokens --------------------------------
+       Bootstrap .alert-* and WHMCS .label.* components. Softer variants
+       for alert boxes, more saturated for small labels. */
+
+    /* Alerts (larger boxes) */
+    --alert-info-bg:     #27566a;  --alert-info-text:    #cde6f0;  --alert-info-bd:    #336e83;
+    --alert-success-bg:  #2d5a2d;  --alert-success-text: #cde6c3;  --alert-success-bd: #3c763d;
+    --alert-danger-bg:   #6a2d2d;  --alert-danger-text:  #f0c0c0;  --alert-danger-bd:  #9a3838;
+    --alert-warning-bg:  #7a5420;  --alert-warning-text: #ffe0b0;  --alert-warning-bd: #a2722d;
+
+    /* Update-banner variants (side-border emphasis) */
+    --banner-info-bg:    #1a3747;  --banner-info-bd:    #035485;
+    --banner-danger-bg:  #3a1a1a;  --banner-danger-bd:  #c71616;
+    --banner-success-bg: #2a3e1a;  --banner-success-bd: #6dad18;
+    --banner-warning-bg: #3a2c1a;  --banner-warning-bd: #f77b11;
+
+    /* Labels (saturated single colors) */
+    --label-success:     #3c7d3c;
+    --label-danger:      #a33a33;
+    --label-warning:     #9a6505;
+    --label-info:        #0768b8;
+    --label-teal:        #006d6d;
+    --label-neutral:     #5a5a5a;
+    --label-default:     #565656;
+
+    /* ---- Legacy raw colors still in use (tokenized for findability) - */
+    --legacy-th-bg:      #022336;    /* table header background, navy */
+    --legacy-hover-bd:   #424242;    /* row hover border */
+}
+
+/* =====================================================================
+   2. BASE ELEMENTS
+   --------------------------------------------------------------------- */
+
+body {
+    background-color: var(--color-dark) !important;
+    color: var(--color-text) !important;
+}
+
+hr {
+    border-color: var(--color-border) !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--color-heading) !important;
+    font-weight: bold !important;
+    margin: 0 0 5px 0 !important;
+}
+
+a {
+    color: var(--color-link) !important;
+    text-decoration: none !important;
+}
+
+a:hover {
+    color: var(--color-link-hover) !important;
+}
+
+img, .logo img, div#previewwndcontent img, div#ticketreplies img, .lb-container img {
+    opacity: 1;
+}
+
+blockquote {
+    border-left: 5px solid var(--color-border-2);
+}
+
+blockquote p {
+    color: var(--color-text-dim);
+}
+
+/* Global button/input baseline - keep here so override chains behave */
+button, input, select, textarea {
+    color: var(--color-text-strong);
+    background-color: var(--color-dark-4);
+}
+
+/* =====================================================================
+   3. LAYOUT
+   --------------------------------------------------------------------- */
+
+.header,
+.contentarea {
+    background-color: var(--color-dark) !important;
+}
+
+.contentarea {
+    border-color: var(--color-dark-3) !important;
+}
+
+/* WHMCS ships contentarea with background: var(--color-white) and the theme-bg wrapper with #f8f9fb */
+.contentarea.theme-content-bg,
+.contentarea.theme-content-bg .theme-header {
+    background-color: var(--color-dark-2) !important;
+    border-color: var(--color-border) !important;
+}
+
+.contentbox {
+    background-color: var(--color-dark-4) !important;
+    border-color: var(--color-dark-5) !important;
+}
+
+.contentarea .page-header-btns {
+    background-color: var(--color-dark-3) !important;
+}
+
+.topbar,
+.sidebar .btn-min-sidebar {
+    background-color: var(--color-dark-3) !important;
+}
+
+.topbar a {
+    color: #7a7a7a !important;
+}
+
+.topbar a:hover {
+    color: #a0a0a0 !important;
+}
+
+.topbar .pull-left {
+    color: #555 !important;
+}
+
+.topbar a.update-now {
+    background-color: var(--banner-danger-bg) !important;
+    color: #e0a0a0 !important;
+}
+
+#sidebar {
+    background-color: var(--color-dark-3) !important;
+    border-color: var(--color-dark-3) !important;
+}
+
+#sidebar span.header {
+    background-color: var(--color-dark-3) !important;
+    color: #6a6a6a !important;
+}
+
+.sidebar .sidebar-header {
+    color: #aaa !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.sidebar .sub-header {
+    color: var(--color-text-strong);
+    font-weight: bold;
+}
+
+.footerbar {
+    background-color: var(--color-dark) !important;
+    color: #828282 !important;
+}
+
+.footerbar a {
+    color: var(--color-gray) !important;
+}
+
+.header .stats {
+    color: #737373 !important;
+}
+
+.header .stats a {
+    color: #797979 !important;
+}
+
+.header .stats .stat {
+    font-weight: bold !important;
+    color: #8e6e1b !important;
+    font-size: 15px;
+    line-height: 0px !important;
+}
+
+/* =====================================================================
+   4. NAVIGATION
+   --------------------------------------------------------------------- */
+
+.navigation {
+    background-color: var(--color-dark-3) !important;
+    border-color: var(--color-dark-3) !important;
+}
+
+.navigation ul li {
+    background-color: var(--color-dark-3) !important;
+    border-color: var(--color-dark) !important;
+}
+
+.navigation ul li a {
+    color: #9e9e9e !important;
+}
+
+.navigation ul li a:hover {
+    background: #1b4d7f !important;
+    color: var(--color-white) !important;
+}
+
+.navigation ul li:hover a,
+.navigation ul li ul li:hover a,
+.navigation ul li ul li:hover ul li:hover a {
+    color: #bdbdbd !important;
+}
+
+.navigation ul li ul {
+    background-color: var(--color-dark-5) !important;
+    border-color: var(--color-dark-5) !important;
+}
+
+.navigation ul li ul li {
+    border-color: var(--color-border) !important;
+}
+
+.navigation ul li ul li:first-child {
+    border-color: var(--color-border) !important;
+}
+
+.navigation ul li ul li a:hover {
+    background-color: var(--color-blue) !important;
+    color: var(--color-white) !important;
+}
+
+.navigation ul li ul.drop-icons li a .icon-container i {
+    color: #5795d2 !important;
+}
+
+.navigation ul li ul.drop-icons li.header {
+    background-color: var(--color-dark-6) !important;
+    color: var(--color-text-strong) !important;
+}
+
+.navigation ul li ul.drop-icons li a:hover,
+.drop-icons .navigation ul li:hover {
+    background-color: var(--color-dark-2) !important;
+}
+
+.navigation ul li.divider {
+    background-color: var(--color-border) !important;
+    margin: 0 !important;
+}
+
+.navbar-default {
+    background-color: var(--color-dark-3) !important;
+    border-color: var(--color-border) !important;
+}
+
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:focus,
+.navbar-default .navbar-nav > .active > a:hover {
+    background-color: var(--color-dark-6) !important;
+}
+
+/* -- Nav tabs (admin / client) -- */
+
+.nav-tabs {
+    border-color: var(--color-dark-5) !important;
+}
+
+ul.admin-tabs > li > a,
+ul.client-tabs > li > a {
+    background-color: var(--color-dark-5) !important;
+    border-color: var(--color-dark-5) !important;
+    color: var(--color-text) !important;
+}
+
+ul.admin-tabs > li > a:hover,
+ul.client-tabs > li > a:hover {
+    border-color: var(--color-dark-5) !important;
+}
+
+ul.admin-tabs > li > a:first-child,
+ul.client-tabs > li > a:first-child {
+    margin-left: 0 !important;
+    margin-right: 8px !important;
+}
+
+.admin-tabs li.active a,
+.client-tabs > li.active > a,
+.client-tabs > li.active > a:focus,
+.client-tabs > li.active > a:hover,
+.admin-tabs > li.active > a,
+.admin-tabs > li.active > a:focus,
+.admin-tabs > li.active > a:hover {
+    background-color: #337ab7 !important;
+    border-color: #337ab7 !important;
+    color: var(--color-white) !important;
+}
+
+div.admin-tabs > .active,
+div.client-tabs > .active {
+    border-color: var(--color-dark-5) !important;
+}
+
+div.admin-tabs .context-btn-container,
+div.client-tabs .context-btn-container {
+    background-color: var(--color-dark-4) !important;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:focus,
+.nav-tabs > li.active > a:hover {
+    background-color: var(--color-dark-6) !important;
+    border-color: var(--color-border-2) !important;
+    color: var(--color-text-strong) !important;
+}
+
+.nav-tabs > li > a:hover {
+    border-color: var(--color-border-2) var(--color-border-2) var(--color-dark-5) var(--color-border-2) !important;
+}
+
+.nav > li > a:focus,
+.nav > li > a:hover {
+    background-color: var(--color-dark-3) !important;
+}
+
+/* -- Nav stats (custom icons) -- */
+
+small.v8navstatsul {
+    display: inline-flex;
+    align-content: center;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: -10px 0 0 0;
+}
+
+.v8navstatsul span.icon-container {
+    font-size: 1.5em !important;
+    display: inline-flex;
+    margin: 0 7px 0 0;
+}
+
+.v8navstatsul span.icon-container i {
+    display: contents !important;
+}
+
+.v8fallbackul span.icon-container {
+    font-size: 3em !important;
+}
+
+span.v8fallback {
+    color: #cc7d0e;
+    display: block;
+    font-size: 20px;
+}
+
+.navigation ul.right-nav li a.orders-pending-nav,
+.navigation ul.right-nav li a.invoices-nav,
+.navigation ul.right-nav li a.tickets-nav {
+    background: none !important;
+    margin: 0 !important;
+}
+
+a.orders-pending-nav {
+    margin-right: -10px !important;
+}
+
+.nav-time {
+    max-width: 180px !important;
+}
+
+.nav-time small {
+    padding: 0 10px !important;
+    cursor: pointer;
+    line-height: 34px;
+    display: inline-flex;
+}
+
+/* Note: base sizing and colors for .dtdt-nav-time live in the inline
+   <style> emitted by hooks.php, so they apply in both dark and light
+   mode (the Blend navbar is dark blue in both modes). The rules below
+   are kept because some upstream Blend selectors use `.nav-time`
+   without the `.dtdt-` prefix and we want the same baseline to apply
+   to them too. The color below overrides the inline base to match the
+   dark-mode-specific softer grey (#aaaaaa vs #ffffff) for visual weight
+   in a dark page context. */
+.nav-time span {
+    color: #aaaaaa;
+    font-weight: 500;
+    font-size: 17px;
+}
+
+.nav-time span.icon-container {
+    margin: 0 5px 0 0;
+}
+
+.nav-date,
+.nav-clock {
+    font-weight: 900 !important;
+    color: #d0d0d0 !important;
+}
+
+/* -- Intellisearch -- */
+
+#inputIntelliSearchValue {
+    background: var(--color-dark-6) !important;
+    border-color: var(--color-border-2) !important;
+    color: var(--color-text-strong) !important;
+}
+
+.intellisearchresults {
+    background-color: var(--color-dark-4) !important;
+    border: 1px solid var(--color-dark-5) !important;
+}
+
+.intellisearchresults .search-header,
+.intellisearchresults .search-footer {
+    background-color: var(--color-dark-5) !important;
+    color: var(--color-text-strong) !important;
+}
+
+.intellisearchresults h5 {
+    color: var(--color-text-muted) !important;
+    border-bottom: 1px solid var(--color-border) !important;
+}
+
+.intellisearchresults ul li {
+    background-color: var(--color-dark-3) !important;
+    color: var(--color-text-strong) !important;
+}
+
+.intellisearchresults ul li:hover {
+    background-color: var(--color-dark-5) !important;
+}
+
+.intellisearchresults ul li a {
+    color: var(--color-link) !important;
+}
+
+.intellisearchresults ul li em {
+    color: var(--color-text-muted) !important;
+}
+
+/* -- Search bar (generic WHMCS search) -- */
+
+.search-bar {
+    background: var(--color-dark-3) !important;
+}
+
+.search-bar .simple {
+    background: var(--color-dark-3) !important;
+    border-bottom: 1px dashed var(--color-border) !important;
+}
+
+.search-bar .search-fields {
+    border-color: var(--color-dark-3) !important;
+}
+
+.search-bar .search-icon {
+    background: #326d32 !important;
+    color: #a7a7a7 !important;
+}
+
+/* =====================================================================
+   5. TABLES
+   ---------------------------------------------------------------------
+   WHMCS uses three main table styles in admin:
+     - .datatable   : sortable data grids (clients, orders, invoices)
+     - table.form   : key/value forms with .fieldlabel / .fieldarea cells
+     - .clientssummarystats : the stats grid on client summary pages
+   Plus the generic `table` selector for anything unstyled.
+--------------------------------------------------------------------- */
+
+/* Borders */
+.table-themed     { border: 1px solid var(--color-border-2) !important; }
+
+/* --- Headers ---
+   table th is less specific than table.datatable th, so the datatable
+   rule wins for sortable tables. The first rule covers generic/bordered
+   tables (forms, inline tables). */
+table th,
+.table-bordered {
+    background-color: var(--color-dark-3) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text-strong) !important;
+    text-decoration: none;
+}
+
+table.datatable th,
+table.datatable th a,
+table.datatable th a:visited {
+    background-color: var(--legacy-th-bg) !important;
+    color: var(--color-text-strong) !important;
+    text-decoration: none;
+}
+
+table th a {
+    color: var(--color-link) !important;
+    border-color: var(--color-dark-5) !important;
+}
+
+/* --- Body cells ---
+   Previously `table td` and `table.datatable td` were defined separately
+   with identical backgrounds - merged here. */
+table td,
+table.datatable td {
+    background-color: var(--color-dark-4) !important;
+    border-color: var(--color-dark-5) !important;
+    color: var(--color-text-strong) !important;
+}
+
+table.datatable td { border-bottom: 1px solid var(--color-dark-5) !important; }
+
+table tr:hover td,
+.tab-pane table tr:hover td {
+    background: var(--color-dark-5) !important;
+    border-color: var(--legacy-hover-bd) !important;
+}
+
+.datatable tr.detail-row td {
+    background-color: var(--color-dark-3) !important;
+}
+
+table.datatable tr td.field-highlight {
+    background-color: var(--color-dark-6) !important;
+}
+
+/* Row highlight on datatables (scheduled actions, billable items, etc) */
+table.datatable tr.rowhighlight td,
+tr.rowhighlight > td {
+    background: var(--status-yellow-bg) !important;
+}
+
+/* --- client summary stats grid --- */
+table.clientssummarystats {
+    border: 4px solid var(--color-dark-3) !important;
+}
+
+table.clientssummarystats tbody tr td {
+    padding: 5px 8px !important;
+    color: var(--color-text-strong);
+}
+
+table.clientssummarystats tr.altrow td {
+    background-color: var(--color-dark-5) !important;
+}
+
+/* --- Form tables (key/value grids) --- */
+table.form {
+    background-color: var(--color-dark-3) !important;
+    border: 3px solid var(--color-dark-5) !important;
+}
+
+table.form td.fieldlabel {
+    background-color: var(--color-dark-3) !important;
+    color: var(--color-text-strong) !important;
+}
+
+table.form td.fieldarea {
+    background-color: var(--color-dark-4) !important;
+    color: var(--color-text-strong) !important;
+}
+
+table.form td.fieldarea .inset-whitebg-container {
+    background-color: var(--color-dark-5) !important;
+    color: var(--color-text-strong) !important;
+}
+
+
+/* ---------------------------------------------------------------------
+   Inline-styled status row/item colors
+   ---------------------------------------------------------------------
+   Verified against WHMCS 7.8 source (admin/clientsservices.php lines
+   903-950). The canonical service status palette is:
+
+     #FFFFCC  =>  Pending
+     #CCFF99  =>  Suspended
+     #FF9999  =>  Terminated, Cancelled, Fraud, Completed
+     #FFF     =>  Active + anything else (no override needed; body bg
+                  inherits through)
+
+   Applied by PHP via inline `style="background-color: #XXX"` on:
+     - <tr> rows in tbladdons / tblhosting datatables
+     - <div> items inside selectize dropdowns (service picker)
+     - <div class="item"> pill rendering when selectize clones the
+       chosen option into the input box
+
+   Other shades in this section (e.g. #ffdede, #ffb6ba, #ccffcc) are
+   kept for compatibility - older WHMCS versions, addon modules, and
+   the server-sync tool use them.
+
+   Case-insensitive [style*="#xxx" i] matching avoids duplicate
+   selectors for #FF9999 vs #ff9999 etc. Universal since 2018.
+--------------------------------------------------------------------- */
+
+/* --- Red family: Terminated / Cancelled / Fraud / Completed --- */
+table td[style*="#ff9999" i],
+table td[style*="#ffdede" i],
+table td[style*="#ffd5d5" i],
+table td[style*="#ffcccc" i],
+table td[style*="#ffebeb" i],
+table td[style*="#ffb6ba" i],
+table td[style*="#fee8e9" i],
+table td[style*="#fdd" i],
+table tr[style*="#ff9999" i] td,
+table tr[style*="#ffdede" i] td,
+table tr[style*="#fdd" i] td,
+tr[style*="#ff9999" i] > td,
+tr[style*="#ffdede" i] > td,
+tr[style*="#fdd" i] > td,
+.selectize-dropdown-content > div[style*="#ff9999" i],
+.selectize-dropdown-content > div[style*="#ffdede" i],
+.selectize-dropdown-content > div[style*="#fdd" i],
+.selectize-input > div[style*="#ff9999" i],
+.selectize-input > div[style*="#ffdede" i],
+.selectize-input > div[style*="#fdd" i],
+.selectize-input > .item[style*="#ff9999" i],
+.selectize-input > .item[style*="#ffdede" i] {
+    background: var(--status-red-bg) !important;
+    background-color: var(--status-red-bg) !important;
+    color: var(--status-red-text) !important;
+}
+
+.selectize-dropdown-content > div[style*="#ff9999" i] .name,
+.selectize-dropdown-content > div[style*="#ffdede" i] .name,
+.selectize-dropdown-content > div[style*="#fdd" i] .name,
+.selectize-input > div[style*="#ff9999" i] .name,
+.selectize-input > div[style*="#ffdede" i] .name,
+.selectize-input > div[style*="#fdd" i] .name {
+    color: var(--status-red-text) !important;
+}
+
+/* --- Green family: Suspended (also: active/paid/success in older code) --- */
+table td[style*="#ccff99" i],
+table td[style*="#99ff99" i],
+table td[style*="#97f295" i],
+table td[style*="#ccffcc" i],
+table td[style*="#e7ffda" i],
+table td[style*="#ebffeb" i],
+table td[style*="#ddffdd" i],
+table td[style*="#dfffdf" i],
+table td[style*="#ebfee2" i],
+table td[style*="#d9e6c3" i],
+table td[style*="#dff0d8" i],
+table tr[style*="#ccff99" i] td,
+table tr[style*="#99ff99" i] td,
+table tr[style*="#ebfee2" i] td,
+table tr[style*="#ddffdd" i] td,
+tr[style*="#ccff99" i] > td,
+tr[style*="#99ff99" i] > td,
+tr[style*="#ebfee2" i] > td,
+tr[style*="#ddffdd" i] > td,
+.selectize-dropdown-content > div[style*="#ccff99" i],
+.selectize-dropdown-content > div[style*="#99ff99" i],
+.selectize-dropdown-content > div[style*="#ccffcc" i],
+.selectize-dropdown-content > div[style*="#e7ffda" i],
+.selectize-input > div[style*="#ccff99" i],
+.selectize-input > div[style*="#99ff99" i],
+.selectize-input > div[style*="#ccffcc" i],
+.selectize-input > div[style*="#e7ffda" i],
+.selectize-input > .item[style*="#ccff99" i],
+.selectize-input > .item[style*="#99ff99" i] {
+    background: var(--status-green-bg) !important;
+    background-color: var(--status-green-bg) !important;
+    color: var(--status-green-text) !important;
+}
+
+.selectize-dropdown-content > div[style*="#ccff99" i] .name,
+.selectize-dropdown-content > div[style*="#99ff99" i] .name,
+.selectize-dropdown-content > div[style*="#ccffcc" i] .name,
+.selectize-dropdown-content > div[style*="#e7ffda" i] .name,
+.selectize-input > div[style*="#ccff99" i] .name,
+.selectize-input > div[style*="#99ff99" i] .name,
+.selectize-input > div[style*="#ccffcc" i] .name,
+.selectize-input > div[style*="#e7ffda" i] .name {
+    color: var(--status-green-text) !important;
+}
+
+/* --- Yellow family: Pending --- */
+table td[style*="#ffffcc" i],
+table td[style*="#ffffdd" i],
+table td[style*="#ffff99" i],
+table td[style*="#fff2aa" i],
+table td[style*="#fff3d2" i],
+table td[style*="#fcf8e3" i],
+table td[style*="#faf6d4" i],
+tr[style*="#ffffcc" i] > td,
+tr[style*="#ffffdd" i] > td,
+tr[style*="#ffff99" i] > td,
+tr[style*="#fcf8e3" i] > td,
+.selectize-dropdown-content > div[style*="#ffffcc" i],
+.selectize-dropdown-content > div[style*="#ffffdd" i],
+.selectize-dropdown-content > div[style*="#ffff99" i],
+.selectize-input > div[style*="#ffffcc" i],
+.selectize-input > div[style*="#ffffdd" i],
+.selectize-input > div[style*="#ffff99" i] {
+    background: var(--status-yellow-bg) !important;
+    background-color: var(--status-yellow-bg) !important;
+    color: var(--status-yellow-text) !important;
+}
+
+.selectize-dropdown-content > div[style*="#ffffcc" i] .name,
+.selectize-dropdown-content > div[style*="#ffffdd" i] .name,
+.selectize-dropdown-content > div[style*="#ffff99" i] .name,
+.selectize-input > div[style*="#ffffcc" i] .name,
+.selectize-input > div[style*="#ffffdd" i] .name,
+.selectize-input > div[style*="#ffff99" i] .name {
+    color: var(--status-yellow-text) !important;
+}
+
+/* --- Blue family: info rows --- */
+table td[style*="#ebebff" i],
+table td[style*="#d9edf7" i],
+table td[style*="#eff2f9" i],
+table td[style*="#ecf6ff" i],
+tr[style*="#ebebff" i] > td,
+.selectize-dropdown-content > div[style*="#ebebff" i],
+.selectize-input > div[style*="#ebebff" i] {
+    background: var(--status-blue-bg) !important;
+    background-color: var(--status-blue-bg) !important;
+    color: var(--status-blue-text) !important;
+}
+
+.selectize-input > div[style*="#ebebff" i] .name {
+    color: var(--status-blue-text) !important;
+}
+
+/* --- Gray / dimmed family: older completed/terminated stylings ---
+   The trailing semicolon anchor on #ccc; prevents accidentally matching
+   longer hex values (#cccccc, #ccc999, etc). For #CCCCCC we use an
+   exact-length match via the full 6-digit form. */
+table td[style*="#ccc;" i],
+table td[style*="#cccccc" i],
+table td[style*="#dddddd" i],
+tr[style*="#cccccc" i] > td,
+.selectize-dropdown-content > div[style*="#ccc;" i],
+.selectize-dropdown-content > div[style*="#cccccc" i],
+.selectize-dropdown-content > div[style*="#dddddd" i],
+.selectize-input > div[style*="#ccc;" i],
+.selectize-input > div[style*="#cccccc" i],
+.selectize-input > div[style*="#dddddd" i] {
+    background: var(--status-muted-bg) !important;
+    background-color: var(--status-muted-bg) !important;
+    color: #888888 !important;
+}
+
+.selectize-dropdown-content > div[style*="#ccc;" i] .name,
+.selectize-dropdown-content > div[style*="#cccccc" i] .name,
+.selectize-dropdown-content > div[style*="#dddddd" i] .name,
+.selectize-input > div[style*="#ccc;" i] .name,
+.selectize-input > div[style*="#cccccc" i] .name,
+.selectize-input > div[style*="#dddddd" i] .name {
+    color: #888888 !important;
+}
+
+/* Links inside status-highlighted rows need their own color override
+   because td color won't cascade through <a> tags with !important */
+table tr[style*="#ff9999" i] td a,
+table tr[style*="#ffdede" i] td a,
+table tr[style*="#fdd" i] td a,
+tr[style*="#ff9999" i] > td a,
+tr[style*="#ffdede" i] > td a {
+    color: var(--status-red-link) !important;
+}
+
+table tr[style*="#ccff99" i] td a,
+table tr[style*="#99ff99" i] td a,
+table tr[style*="#e7ffda" i] td a,
+table tr[style*="#ebfee2" i] td a,
+tr[style*="#ccff99" i] > td a,
+tr[style*="#99ff99" i] > td a,
+tr[style*="#e7ffda" i] > td a,
+tr[style*="#ebfee2" i] > td a {
+    color: var(--status-green-link) !important;
+}
+
+/* ---------------------------------------------------------------------
+   HTML bgcolor attribute coverage (legacy, pre-CSS)
+   ---------------------------------------------------------------------
+   WHMCS admin/reports.php line 230 uses `bgcolor="#FFFFCC"` on drilldown
+   rows - a 1990s-era HTML attribute, not a `style=` value, so our
+   `[style*=]` matchers miss it. Add explicit [bgcolor] coverage here.
+   Source audit found these variants in use:
+     bgcolor="#FFFFCC"  (reports drilldown)
+     bgcolor="#cccccc"  (dividers)
+     bgcolor="#efefef"  (striping)
+     bgcolor="#f4f4f4"  (striping)
+     bgcolor="#ffffff"  (default row)
+--------------------------------------------------------------------- */
+
+tr[bgcolor*="#FFFFCC" i] > td,
+td[bgcolor*="#FFFFCC" i] {
+    background-color: var(--status-yellow-bg) !important;
+    color: var(--status-yellow-text) !important;
+}
+
+tr[bgcolor*="#cccccc" i] > td,
+tr[bgcolor*="#efefef" i] > td,
+tr[bgcolor*="#f4f4f4" i] > td,
+tr[bgcolor*="#ffffff" i] > td,
+td[bgcolor*="#cccccc" i],
+td[bgcolor*="#efefef" i],
+td[bgcolor*="#f4f4f4" i],
+td[bgcolor*="#ffffff" i],
+td[bgcolor="#fff" i],
+tr[bgcolor="#fff" i] > td {
+    background-color: var(--color-dark-2) !important;
+    color: var(--color-text) !important;
+}
+
+/* ---------------------------------------------------------------------
+   Inline gray striping / neutral fills
+   ---------------------------------------------------------------------
+   Source audit found #EFEFEF applied inline across ~23 admin pages for
+   zebra striping, section backgrounds, and PHPInfo styling. #F8F8F8 and
+   #F6F6F6 are used similarly but less often. None of these are status
+   indicators - they're just "slightly off white" fills that need to
+   flip to "slightly off black" on dark mode.
+
+   Files using #EFEFEF inline include: reports.php, clientsdomains.php,
+   configproducts.php, sendmessage.php, clientssummary.php, invoices.php,
+   configgateways.php, supportkb.php, configbundles.php,
+   utilitiesresolvercheck.php, project_management/views/view.php,
+   configauto.php, transactions.php, systemphpinfo.php.
+--------------------------------------------------------------------- */
+
+[style*="#efefef" i]:not(select):not(option):not(input),
+[style*="#f8f8f8" i]:not(select):not(option):not(input),
+[style*="#f6f6f6" i]:not(select):not(option):not(input),
+[style*="#f3f3f3" i]:not(select):not(option):not(input),
+[style*="#f2f2f2" i]:not(select):not(option):not(input),
+[style*="#fafafa" i]:not(select):not(option):not(input),
+[style*="#fcfcfc" i]:not(select):not(option):not(input),
+[style*="#eeeeee" i]:not(select):not(option):not(input),
+[style*="#eee;" i]:not(select):not(option):not(input) {
+    background-color: var(--color-dark-2) !important;
+    color: var(--color-text) !important;
+}
+
+/* systemphpinfo.php: the .e/.v/.vr classes have inline-like coverage but
+   also hit from the <style> block itself. Force the neutral fills. */
+.e[style*="#EFF2F9" i],
+.v[style*="#efefef" i],
+.vr[style*="#efefef" i] {
+    background-color: var(--color-dark-3) !important;
+    color: var(--color-text) !important;
+}
+
+/* Inline pure white backgrounds - applied to row/cell in 15+ admin files
+   (configopenid.php, configgateways.php, etc). Flip to surface color.
+   The attribute selectors MUST contain the literal hex value since that's
+   what the browser matches against the DOM's style attribute. */
+table tr[style*="#FFFFFF" i] > td:not([style*="#ff9999" i]):not([style*="#ffffcc" i]):not([style*="#ccff99" i]),
+table tr[style*="#FFF;" i] > td:not([style*="#ff9999" i]):not([style*="#ffffcc" i]):not([style*="#ccff99" i]),
+table td[style*="background-color:#FFFFFF" i],
+table td[style*="background-color: #FFFFFF" i],
+table td[style*="background-color:#fff;" i],
+table td[style*="background-color: #fff;" i] {
+    background-color: var(--color-dark-2) !important;
+    color: var(--color-text) !important;
+}
+
+/* ---------------------------------------------------------------------
+   Addon module: staffboard noticeboard colored categories
+   ---------------------------------------------------------------------
+   modules/addons/staffboard/hooks.php line 32 defines these via <style>
+   block (not inline), so they're targetable by class. Source reveals:
+     .pink   = #F3CBF3
+     .yellow = #FFFFC1
+     .purple = #DCD7FE
+     .white  = #FAFAFA
+     .blue   = #A6E3FC
+     .green  = #A5F88B
+   Our existing staffboard overrides cover these, but adding a belt-and-
+   suspenders catch for any inline usage of the same hexes. */
+[style*="#F3CBF3" i]:not(select):not(option),
+[style*="#FFFFC1" i]:not(select):not(option),
+[style*="#DCD7FE" i]:not(select):not(option),
+[style*="#A6E3FC" i]:not(select):not(option),
+[style*="#A5F88B" i]:not(select):not(option) {
+    background-color: var(--color-dark-3) !important;
+    color: var(--color-text) !important;
+}
+
+/* ---------------------------------------------------------------------
+   Admin-page-specific inline backgrounds (per WHMCS 7.8 source audit)
+--------------------------------------------------------------------- */
+
+/* orders.php line 677/785/827: server/registrar inset in order form */
+table tr td[style*="#EFF2F9" i],
+table td[style*="#EFF2F9" i] {
+    background-color: var(--status-blue-bg) !important;
+    color: var(--color-text) !important;
+}
+
+/* supportcenter.php: ticket stat boxes - use #FEFAEB cream
+   (already handled via .ticketstatbox class but belt-and-suspenders) */
+div[style*="#FEFAEB" i] {
+    background-color: #3d3620 !important;
+    color: var(--color-text-strong) !important;
+}
+
+/* systemsupportrequest.php: help search box with #FBF7EA */
+div[style*="#FBF7EA" i] {
+    background-color: var(--status-cream-bg) !important;
+    color: var(--color-text-strong) !important;
+}
+
+/* admindialog modal backdrop gets background-color:#ccc applied via
+   JavaScript (vendor/whmcs/whmcs-foundation/lib/Admin.php #dialogOpen).
+   #bgfilter is the element name. */
+#bgfilter {
+    background-color: #000 !important;
+}
+
+/* calendar.php: calendar controls and edit popup - applied via <style> tag
+   inside the PHP echo, targetable by ID */
+#caledit,
+#calendarcontrols {
+    background-color: var(--color-dark-3) !important;
+    border: 1px solid var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+
+/* Bootstrap contextual row classes (tr.danger/warning/success/info) - WHMCS
+   also uses these in some datatables. */
+.table > tbody > tr.danger > td,
+.table > tbody > tr > td.danger,
+.table-hover > tbody > tr.danger:hover > td,
+table tr.danger > td,
+table tr > td.danger {
+    background-color: var(--status-red-bg) !important;
+    color: var(--status-red-text) !important;
+}
+
+.table > tbody > tr.warning > td,
+.table > tbody > tr > td.warning,
+.table-hover > tbody > tr.warning:hover > td,
+table tr.warning > td,
+table tr > td.warning {
+    background-color: var(--status-yellow-bg) !important;
+    color: var(--status-yellow-text) !important;
+}
+
+.table > tbody > tr.success > td,
+.table > tbody > tr > td.success,
+.table-hover > tbody > tr.success:hover > td,
+table tr.success > td,
+table tr > td.success {
+    background-color: var(--status-green-bg) !important;
+    color: var(--status-green-text) !important;
+}
+
+.table > tbody > tr.info > td,
+.table > tbody > tr > td.info,
+.table-hover > tbody > tr.info:hover > td,
+table tr.info > td,
+table tr > td.info {
+    background-color: var(--status-blue-bg) !important;
+    color: var(--status-blue-text) !important;
+}
+
+.table > tbody > tr.danger > td a,
+table tr.danger > td a {
+    color: var(--status-red-link) !important;
+}
+
+.invoicetooltip {
+    border: 1px solid #505050 !important;
+    background-color: #505050 !important;
+    padding: 5px !important;
+    border-radius: 7px !important;
+}
+
+.invoicetooltip tr td {
+    color: #989770 !important;
+    border: 1px solid var(--color-border) !important;
+    padding: 3px 10px !important;
+    background: #23272b !important;
+}
+
+/* Preview window and popups that legitimately need a light bg - keep them light but isolate */
+div#previewwndcontent table tbody td,
+div#previewwndcontent table tbody th {
+    background: var(--color-white) !important;
+}
+
+.table-serversync tr.matched:not(.dupe) span {
+    background-color: #40ce3c;
+    color: var(--color-dark);
+}
+
+.table-serversync tr.matched span.e {
+    background-color: #ed4f57;
+}
+
+.dataTables_wrapper.no-footer div {
+    border-color: var(--color-border) !important;
+    background: transparent !important;
+}
+
+/* Markdown tables rendered in ticket replies, KB etc */
+.markdown-content table {
+    background-color: var(--color-dark-4) !important;
+    border: 1px solid var(--color-dark-5) !important;
+}
+
+.markdown-content table > thead > tr > th {
+    background-color: var(--color-dark-5) !important;
+    border: 1px solid var(--color-dark-6) !important;
+    color: var(--color-text-strong) !important;
+}
+
+.markdown-content table > tbody > tr > td {
+    border: 1px solid var(--color-dark-5) !important;
+    color: var(--color-text) !important;
+}
+
+.markdown-content pre {
+    background-color: var(--color-dark-2) !important;
+    color: var(--color-text-strong) !important;
+}
+
+/* =====================================================================
+   6. FORMS
+   --------------------------------------------------------------------- */
+
+.form-control {
+    color: var(--color-text-strong) !important;
+    background-color: var(--color-dark-4) !important;
+    border-color: var(--color-border) !important;
+}
+
+.form-control[disabled],
+.form-control[readonly],
+fieldset[disabled] .form-control {
+    background-color: var(--color-dark-3) !important;
+    color: var(--color-text-muted) !important;
+}
+
+.inline-edit {
+    background: transparent !important;
+    border-bottom: 1px dashed #369 !important;
+    color: var(--color-text-strong) !important;
+}
+
+.inline-edit:focus {
+    background-color: var(--color-dark-5) !important;
+    color: var(--color-text-strong) !important;
+    box-shadow: none !important;
+}
+
+.input-group-addon {
+    background-color: var(--color-dark-2) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+
+select {
+    background: var(--color-dark-4) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text-strong) !important;
+}
+
+/* -- Selectize -- */
+
+.selectize-control.single .selectize-input.input-active,
+.selectize-input,
+.selectize-input.full {
+    background: var(--color-dark-4) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+
+.selectize-dropdown,
+.selectize-dropdown.form-control {
+    background: var(--color-dark-4) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+
+.selectize-dropdown-content .selected.active {
+    background: var(--color-dark-5) !important;
+}
+
+.selectize-dropdown-content .selected.active span {
+    color: var(--color-text) !important;
+}
+
+.selectize-dropdown .active {
+    background-color: var(--color-dark-5) !important;
+    color: var(--color-text-strong) !important;
+}
+
+.selectize-dropdown .optgroup-header {
+    background: var(--color-dark-3) !important;
+    color: var(--color-text-muted) !important;
+}
+
+.selectize-dropdown-header {
+    background: var(--color-dark-3) !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+
+.selectize-dropdown-header-close {
+    color: var(--color-text) !important;
+}
+
+.selectize-dropdown-header-close:hover {
+    color: var(--color-text-strong) !important;
+}
+
+.selectize-control.multi .selectize-input > div {
+    background: var(--color-dark-6) !important;
+    color: var(--color-text-strong) !important;
+}
+
+.selectize span.email,
+.selectize-dropdown-content span.order-details,
+.selectize span.mouse {
+    color: var(--color-text-muted) !important;
+}
+
+/* -- Bootstrap switch -- */
+
+.bootstrap-switch {
+    border-color: #7d7d7d !important;
+}
+
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-primary,
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-primary {
+    background: var(--color-blue-3) !important;
+    border-color: var(--color-border) !important;
+}
+
+.bootstrap-switch .bootstrap-switch-label {
+    background: #505050 !important;
+    color: var(--color-text) !important;
+}
+
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-default,
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-default {
+    color: var(--color-dark) !important;
+    background: #737373 !important;
+}
+
+/* =====================================================================
+   7. CARDS & PANELS
+   --------------------------------------------------------------------- */
+
+.panel {
+    background-color: var(--color-dark) !important;
+}
+
+.panel-default {
+    border-color: #444 !important;
+}
+
+.panel-body {
+    background: var(--color-dark-4) !important;
+    color: var(--color-text) !important;
+}
+
+.panel-footer,
+.panel-heading {
+    background: var(--color-dark-5) !important;
+    border-color: var(--color-dark-6) !important;
+}
+
+.panel-primary > .panel-heading {
+    background-color: var(--color-blue) !important;
+    border-color: var(--color-blue) !important;
+    color: var(--color-text-strong) !important;
+}
+
+.panel-default > .panel-heading {
+    color: #a6a6a6 !important;
+}
+
+.well {
+    background-color: var(--color-dark-2) !important;
+    border: 1px solid var(--color-dark-5) !important;
+    color: var(--color-text) !important;
+}
+
+.inset-grey-bg {
+    background-color: var(--color-dark-1) !important;
+}
+
+.bordered {
+    background-color: var(--color-dark-4) !important;
+    border: 3px solid var(--color-dark-5) !important;
+}
+
+.bordered:hover {
+    background: var(--color-dark) !important;
+}
+
+/* Popovers (Bootstrap base is #fff - was previously unhandled) */
+.popover {
+    background-color: var(--color-dark-4) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+
+.popover-title {
+    background-color: var(--color-dark-5) !important;
+    color: var(--color-text-strong) !important;
+    border-bottom-color: var(--color-border) !important;
+}
+
+.popover.top > .arrow:after    { border-top-color: var(--color-dark-4) !important; }
+.popover.right > .arrow:after  { border-right-color: var(--color-dark-4) !important; }
+.popover.bottom > .arrow:after { border-bottom-color: var(--color-dark-4) !important; }
+.popover.left > .arrow:after   { border-left-color: var(--color-dark-4) !important; }
+
+.popover-content {
+    color: var(--color-text) !important;
+}
+
+/* Tour-style popovers have their own theming */
+.tour-marketconnect {
+    background-color: #2e3c22 !important;
+}
+
+.tour-marketconnect .popover-title {
+    padding-top: 10px !important;
+    background-color: #3c502d !important;
+}
+
+/* Arrow color must match the tour bg, NOT the default popover bg.
+   Scoped to tour-* variants so generic popovers keep the dark arrow. */
+.popover[class*="tour-"].right > .arrow:after {
+    border-right-color: #2e3c23 !important;
+}
+
+.popover[class*="tour-"] .popover-navigation [data-role="end"],
+.popover[class*="tour-"] .popover-navigation [data-role="next"],
+.popover[class*="tour-"] .popover-navigation [data-role="prev"] {
+    background: #192312 !important;
+}
+
+/* Tooltips - Bootstrap default (black on white text) actually works okay but unify */
+.tooltip-inner {
+    background-color: var(--color-dark-5) !important;
+    color: var(--color-text-strong) !important;
+}
+
+/* Modals */
+.modal-content {
+    background: var(--color-dark-3) !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border) !important;
+}
+
+.modal-header,
+.whmcs-modal .modal-header:not(.panel-heading) {
+    background-color: var(--color-dark-5) !important;
+    border-bottom-color: var(--color-border) !important;
+    color: var(--color-text-strong) !important;
+}
+
+.modal-footer,
+.whmcs-modal .modal-footer {
+    background-color: var(--color-dark-5) !important;
+    border-top-color: var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+
+.modal-body {
+    color: var(--color-text) !important;
+}
+
+.close {
+    color: var(--color-white) !important;
+    text-shadow: none !important;
+    opacity: 0.6 !important;
+}
+
+.close:hover {
+    opacity: 1 !important;
+    color: var(--color-white) !important;
+}
+
+/* Popup content area (preview panes) */
+.popup-content-area {
+    background: var(--color-dark-5) !important;
+    border: 4px solid var(--color-dark-6) !important;
+    color: var(--color-text) !important;
+}
+
+.popup-content-area td,
+.popup-content-area tr td,
+.popup-content-area table th,
+.popup-content-area tr:hover td {
+    background: var(--color-dark-4) !important;
+    color: var(--color-text-strong) !important;
+}
+
+.popup-content-area h2 {
+    color: #FA3 !important;
+    font-weight: bold !important;
+}
+
+.popup-content-area a {
+    color: #6c6 !important;
+    font-weight: bold !important;
+}
+
+/* List group - Bootstrap default is #fff */
+.list-group-item {
+    background-color: var(--color-dark-4) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+
+a.list-group-item,
+button.list-group-item {
+    color: var(--color-text) !important;
+}
+
+a.list-group-item:focus,
+a.list-group-item:hover,
+button.list-group-item:focus,
+button.list-group-item:hover {
+    background-color: var(--color-dark-5) !important;
+    color: var(--color-text-strong) !important;
+}
+
+a.list-group-item .list-group-item-heading,
+button.list-group-item .list-group-item-heading {
+    color: var(--color-text-strong) !important;
+}
+
+.list-group-item.disabled,
+.list-group-item.disabled:focus,
+.list-group-item.disabled:hover {
+    background-color: var(--color-dark-3) !important;
+    color: var(--color-text-muted) !important;
+}
+
+/* Thumbnail - image thumb box */
+.thumbnail,
+.ticketattachmentthumb {
+    background-color: var(--color-dark-4) !important;
+    border-color: var(--color-border) !important;
+}
+
+/* Scheduled actions panels */
+.panel-scheduled-actions-management {
+    background-color: var(--color-dark-3) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+
+.panel-scheduled-actions-management .panel-body .container-fluid {
+    background-color: var(--color-dark-4) !important;
+    border-color: var(--color-border) !important;
+}
+
+.panel-scheduled-actions-management .panel-title,
+.panel-scheduled-actions-management .panel-title-detailed,
+.panel-scheduled-actions-management .panel-body .container-item {
+    color: var(--color-text-strong) !important;
+}
+
+.panel-scheduled-actions-management .panel-icon {
+    background-color: var(--color-dark-5) !important;
+}
+
+#scheduledActionsList {
+    background-color: var(--color-dark-4) !important;
+    border: 1px solid var(--color-border) !important;
+}
+
+#scheduledActionsList td,
+#scheduledActionsList th {
+    border-color: var(--color-border) !important;
+    color: var(--color-text-strong) !important;
+    background: var(--color-dark-4) !important;
+}
+
+#scheduledActionsList tr.selected {
+    background-color: var(--color-dark-5) !important;
+}
+
+#ticketReplyScheduledActions {
+    background-color: var(--color-dark-3) !important;
+}
+
+/* Auth container */
+.auth-container {
+    background: var(--color-dark-4) !important;
+    border-color: var(--color-border-2) !important;
+    border-radius: 5px !important;
+    color: var(--color-text) !important;
+}
+
+/* Validation containers (order / user panels) */
+.validation-container-order,
+.validation-container-user {
+    background-color: var(--color-dark-4) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+
+.valComSpinnerOverlay {
+    background: var(--color-dark-3) !important;
+}
+
+/* Fraud-provider form field cells */
+.fraud-provider-form table.form tr td.fieldlabel {
+    background-color: var(--color-dark-3) !important;
+    color: var(--color-text-strong) !important;
+}
+
+/* Misc "white-bg" containers seen inline */
+.inset-element-container {
+    background-color: var(--color-dark-4) !important;
+    color: var(--color-text) !important;
+}
+
+.homebox {
+    background-color: var(--color-dark-4) !important;
+    border: 2px solid var(--color-border) !important;
+}
+
+/* Email template status cards */
+.emailtplstandard { background-color: var(--color-dark-5) !important; }
+.emailtplcustom   { background-color: #3d3a1a !important; }
+.emailtpldisabled { background-color: #3b1e1e !important; }
+
+.email-attachment {
+    background-color: var(--color-dark-4) !important;
+    border: 1px solid var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+
+/* =====================================================================
+   8. ALERTS, LABELS, BADGES, BOXES
+   --------------------------------------------------------------------- */
+
+/* Alerts */
+.alert-info {
+    color: var(--alert-info-text) !important;
+    background-color: var(--alert-info-bg) !important;
+    border-color: var(--alert-info-bd) !important;
+}
+
+.alert-success {
+    color: var(--alert-success-text) !important;
+    background-color: var(--alert-success-bg) !important;
+    border-color: var(--alert-success-bd) !important;
+}
+
+.alert-danger {
+    color: var(--alert-danger-text) !important;
+    background-color: var(--alert-danger-bg) !important;
+    border-color: var(--alert-danger-bd) !important;
+}
+
+.alert-warning {
+    color: var(--alert-warning-text) !important;
+    background-color: var(--alert-warning-bg) !important;
+    border-color: var(--alert-warning-bd) !important;
+}
+
+.alert-grey,
+.alert-update-banner-grey {
+    color: var(--color-text) !important;
+    background-color: var(--color-dark-4) !important;
+    border-color: var(--color-border) !important;
+}
+
+.alert-update-banner-info    { background-color: var(--banner-info-bg) !important; border-left-color: var(--banner-info-bd) !important; }
+.alert-update-banner-danger  { background-color: var(--banner-danger-bg) !important; border-left-color: var(--banner-danger-bd) !important; }
+.alert-update-banner-success { background-color: var(--banner-success-bg) !important; border-left-color: var(--banner-success-bd) !important; }
+.alert-update-banner-warning { background-color: var(--banner-warning-bg) !important; border-left-color: var(--banner-warning-bd) !important; }
+
+/* Labels */
+.label-success {
+    background-color: #407940 !important;
+    color: #c3c3c3 !important;
+}
+
+.label-info {
+    background: #2c849e !important;
+}
+
+.label-warning {
+    background-color: var(--alert-warning-bd) !important;
+}
+
+.label-default {
+    background: var(--label-default) !important;
+    color: var(--color-gray-2) !important;
+}
+
+/* WHMCS hardcodes label status colors - some (cancelled, inactive, draft) use
+   light backgrounds that render white text unreadable in dark mode. */
+.label.cancelled,
+.label.inactive {
+    background-color: var(--label-neutral) !important;
+    color: #d8d8d8 !important;
+}
+
+.label.draft {
+    background-color: #3a4d5a !important;
+    color: var(--alert-info-text) !important;
+}
+
+.label.active,
+.label.paid {
+    background-color: var(--label-success) !important;
+}
+
+.label.closed,
+.label.terminated,
+.label.unpaid {
+    background-color: var(--label-danger) !important;
+}
+
+.label.expired,
+.label.refunded,
+.label.suspended,
+.label.transferredaway {
+    background-color: var(--label-info) !important;
+}
+
+.label.collections,
+.label.grace,
+.label.pending,
+.label.pendingregistration,
+.label.pendingtransfer,
+.label.redemption {
+    background-color: var(--label-warning) !important;
+}
+
+.label.completed {
+    background-color: var(--label-teal) !important;
+}
+
+/* Status coloring (pending, active, terminated) */
+td.status[data-filter-value="Pending"],
+.client-summary-name[data-status="Pending"] {
+    color: #a07400 !important;
+}
+
+td.status[data-filter-value="Active"] {
+    color: #458e45 !important;
+}
+
+td.status[data-filter-value="Terminated"] {
+    color: #b13737 !important;
+}
+
+/* Info / Error / Success boxes (WHMCS legacy) */
+.infobox {
+    background-color: var(--color-dark-5) !important;
+    color: var(--color-text-strong) !important;
+    border-width: 4px;
+}
+
+.infobox span.title {
+    color: #8ac !important;
+}
+
+.errorbox {
+    background-color: var(--color-dark-5) !important;
+    color: var(--color-text-strong) !important;
+    border-width: 4px;
+}
+
+.errorbox span.title {
+    color: #e09898 !important;
+}
+
+.successbox {
+    background-color: #263d26 !important;
+    color: var(--color-text-strong) !important;
+    border-color: #407940 !important;
+}
+
+.successbox span.title {
+    color: #9bc89b !important;
+}
+
+.gracefulexit {
+    background-color: var(--color-dark-5) !important;
+    color: #8cf !important;
+}
+
+.ticketflag {
+    background-color: #3a2b16 !important;
+}
+
+.contexthelp {
+    border: 1px solid #989029 !important;
+    background-color: #4a4420 !important;
+    color: #e8dd8a !important;
+}
+
+.contexthelp a {
+    color: #ffdf70 !important;
+}
+
+/* Client summary */
+.client-summary-name {
+    color: #c8a04a !important;
+    font-weight: 900 !important;
+}
+
+.clientssummarybox {
+    background-color: var(--color-dark-4) !important;
+}
+
+.clientsummaryactions {
+    background-color: var(--color-dark-4) !important;
+    border: 1px dashed #3a5a7a !important;
+    color: var(--color-text) !important;
+}
+
+#clientsummarycontainer #statusfilter {
+    background: var(--color-dark-5) !important;
+    border-color: var(--color-dark-5) !important;
+}
+
+#clientsummarycontainer #statusfilter th {
+    background: transparent !important;
+}
+
+#clientsummarycontainer .bulk-actions {
+    background-color: var(--color-dark-5) !important;
+}
+
+/* Breadcrumb (light by default) */
+.breadcrumb {
+    background-color: var(--color-dark-4) !important;
+    color: var(--color-text) !important;
+}
+
+.breadcrumb > .active {
+    color: var(--color-text-dim) !important;
+}
+
+/* Email-verified badge */
+.email-verified-badge {
+    background-color: var(--color-dark-6) !important;
+    color: var(--color-text) !important;
+}
+
+/* =====================================================================
+   9. BUTTONS
+   --------------------------------------------------------------------- */
+
+.btn {
+    margin-bottom: 10px !important;
+}
+
+.btn-default {
+    opacity: 0.6 !important;
+    border-color: #4c4c4c !important;
+    color: var(--color-white) !important;
+    background: #595959 !important;
+}
+
+.btn-default:hover,
+.btn-default.active,
+.btn-default:active,
+.btn-default:focus,
+.btn-default.focus,
+.open > .dropdown-toggle.btn-default {
+    color: var(--color-white) !important;
+    background-color: var(--color-dark-6) !important;
+    border-color: #3e3e3e !important;
+}
+
+.btn-primary {
+    color: var(--color-gray-2) !important;
+}
+
+.btn-success {
+    color: #d2d2d2 !important;
+    background-color: #2f712f !important;
+    border-color: #257525 !important;
+}
+
+.btn-success:hover {
+    color: #bbbbbb !important;
+    background-color: #1d4e1d !important;
+    border-color: #256525 !important;
+}
+
+.btn-danger {
+    color: #d2d2d2 !important;
+    background-color: #a22522 !important;
+    border-color: #9a1d19 !important;
+}
+
+.btn-danger:hover {
+    background-color: #802320 !important;
+    border-color: #61211f !important;
+}
+
+.btn-info {
+    color: #cacaca !important;
+    background-color: #284d6d !important;
+    border-color: #213f48 !important;
+}
+
+.btn-info:hover {
+    color: #cecece !important;
+    background-color: #284d6d !important;
+    border-color: #356f7f !important;
+}
+
+.btn-warning {
+    color: var(--color-white) !important;
+    background-color: #b06c0d !important;
+}
+
+.btn.disabled,
+.btn[disabled],
+fieldset[disabled] .btn {
+    color: #909090 !important;
+    background-color: var(--color-dark-6) !important;
+    border-color: #383838 !important;
+}
+
+.btn-link {
+    color: var(--color-link) !important;
+}
+
+.btn-link:focus,
+.btn-link:hover {
+    color: var(--color-link-hover) !important;
+}
+
+.btn-period-chooser .btn.active {
+    color: #040404 !important;
+    border-color: #9e9292 !important;
+    background: #5d5d5d !important;
+}
+
+button#btnStatusEnabled {
+    background: var(--color-blue) !important;
+    color: #c5c5c5;
+}
+
+button#btnStatusEnabled:hover {
+    background: var(--color-blue-2) !important;
+}
+
+.btn.btn-sm.btn-block.top-margin-5 {
+    background: var(--color-green) !important;
+    color: var(--color-gray-2) !important;
+    border-color: var(--color-green) !important;
+}
+
+.btn.btn-sm.btn-block.top-margin-5:hover {
+    background: var(--color-green-2) !important;
+}
+
+div#modcmdbtns .btn {
+    background: #525039 !important;
+    border-color: #6b6733 !important;
+    color: #a59d63 !important;
+}
+
+div#modcmdbtns .btn:hover {
+    background: #4a482c !important;
+}
+
+/* -- Pagination -- */
+
+.pagination > li > a,
+.pagination > li > span,
+.pager li > a,
+.pager li > span {
+    background-color: var(--color-dark-3) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-link) !important;
+}
+
+.pagination > .disabled > a,
+.pagination > .disabled > a:focus,
+.pagination > .disabled > a:hover,
+.pagination > .disabled > span,
+.pagination > .disabled > span:focus,
+.pagination > .disabled > span:hover,
+.pager .disabled > a,
+.pager .disabled > a:focus,
+.pager .disabled > a:hover,
+.pager .disabled > span {
+    color: var(--color-text-muted) !important;
+    background-color: var(--color-dark-3) !important;
+    border-color: var(--color-border) !important;
+}
+
+.pagination > li > a:focus,
+.pagination > li > a:hover,
+.pagination > li > span:focus,
+.pagination > li > span:hover {
+    color: var(--color-text-strong) !important;
+    background-color: var(--color-dark-5) !important;
+    border-color: var(--color-border-2) !important;
+}
+
+.page-selector.active,
+.pagination > .active > a,
+.pagination > .active > a:focus,
+.pagination > .active > a:hover,
+.pagination > .active > span {
+    background-color: #286090 !important;
+    border-color: #204d74 !important;
+    color: var(--color-white) !important;
+}
+
+/* Browse sections */
+.browse-section-title {
+    background-color: var(--color-dark-5) !important;
+    color: var(--color-text-strong) !important;
+}
+
+/* =====================================================================
+   10. DASHBOARD & WIDGETS
+   --------------------------------------------------------------------- */
+
+.dashboard-panel-item .panel-body {
+    border-color: #444344 !important;
+    background: var(--color-dark-3) !important;
+}
+
+.dashboard-panel-item .panel-heading {
+    background-color: var(--color-dark-5) !important;
+}
+
+.dashboard-panel-item .panel-heading .panel-title,
+.dashboard-panel-item .panel-heading .panel-title .widget-tools {
+    color: #797979 !important;
+}
+
+.widget-clientactivity .clients-list {
+    margin: 0 10px 20px 10px !important;
+}
+
+.widget-clientactivity .client:nth-child(even) {
+    background-color: var(--color-dark-5) !important;
+}
+
+.widget-clientactivity .ip-address {
+    color: #496c6d !important;
+}
+
+.widget-settings li {
+    border-color: #444344 !important;
+    color: #ababab !important;
+}
+
+.widget-settings li.active {
+    background-color: var(--color-dark-1) !important;
+}
+
+.to-do-items .item {
+    background-color: var(--color-dark-5) !important;
+    margin: 0 0 10px 0 !important;
+    padding: 0 10px 10px 10px !important;
+    border: 1px solid var(--color-border) !important;
+}
+
+.widget-content-padded.to-do-items {
+    padding: 15px 10px !important;
+    display: flex;
+    flex-direction: column-reverse;
+    margin-top: 10px;
+}
+
+.widget-content-padded.to-do-items .icheckbox_flat-blue {
+    background: #545454 !important;
+    border-radius: 100% !important;
+}
+
+.to-do-items .due {
+    display: block !important;
+    float: none !important;
+}
+
+.progress-bar-success {
+    background-color: rgb(64, 101, 64) !important;
+}
+
+.progress {
+    background-color: var(--color-dark-4) !important;
+}
+
+.widget-automation .col-sm-6,
+.widget-billing .bordered-right,
+.widget-billing .bordered-top,
+.widget-billing .bordered-left,
+.widget-activity .feed-element,
+.widget-support .footer {
+    border-color: var(--color-border) !important;
+}
+
+.widget-paypaloverview .panel-body div {
+    background: var(--color-dark-3) !important;
+    color: #47985c !important;
+}
+
+.widget-support .tickets-list .ticket:nth-child(even) {
+    background-color: var(--color-dark-5);
+}
+
+polygon {
+    fill: rgb(50, 51, 49) !important;
+}
+
+/* Status cards */
+.status-badge-green {
+    background-color: #528854 !important;
+}
+.status-badge-green .icon {
+    background-color: #3e6f40 !important;
+}
+
+.status-badge-pink {
+    background-color: #c14d7f !important;
+}
+.status-badge-pink .icon {
+    background-color: #a53465 !important;
+}
+
+.status-badge-orange {
+    background-color: #bd8530 !important;
+}
+.status-badge-orange .icon {
+    background-color: #a26e1f !important;
+}
+
+.status-badge-cyan {
+    background-color: #63abaf !important;
+}
+.status-badge-cyan .icon {
+    background-color: #519194 !important;
+}
+
+.health-status-block .detail a,
+.health-status-block .detail a:hover,
+.health-status-block .icon a,
+.health-status-block .icon a:hover {
+    color: #cecece !important;
+}
+
+/* Reports page */
+.report-filters-wrapper {
+    background: var(--color-dark-3) !important;
+    border-color: var(--color-border) !important;
+}
+
+.transactions-header {
+    background-color: var(--color-dark-3) !important;
+}
+
+.transactions-header .stat .icon {
+    background-color: #454545 !important;
+}
+
+.transactions-header .stat {
+    color: #727272 !important;
+}
+
+.transactions-header .stat span {
+    color: #b4b4b4 !important;
+}
+
+/* Chart text */
+text {
+    fill: #696969 !important;
+}
+
+div[aria-label="A chart."] text {
+    fill: #c5c5c5 !important;
+}
+
+rect[x="0"][y="0"] {
+    fill: var(--color-dark) !important;
+}
+
+path[fill="#ffffff"] {
+    fill: #222 !important;
+}
+
+/* QR code inside 2FA modal - keep white */
+#modalAjax svg rect[x="0"][y="0"] {
+    fill: var(--color-white) !important;
+}
+
+#modalAjax svg path[fill="#ffffff"] {
+    fill: var(--color-white) !important;
+}
+
+/* Balance page */
+.balance-hr {
+    border-color: #454545 !important;
+}
+
+.balance-panel {
+    background: var(--color-dark-6) !important;
+    border-color: #454545 !important;
+}
+
+.balance-panel-body span {
+    color: #a5a5a5 !important;
+}
+
+.balance-panel-body span.balance-amount {
+    color: #5dc560 !important;
+}
+
+h2.balance-title {
+    margin-top: 10px !important;
+}
+
+/* Ticket stat boxes */
+.ticketstatbox {
+    background-color: #223060 !important;
+}
+
+.stat {
+    color: #7ac !important;
+}
+
+.ticket-stats-wrapper {
+    margin-bottom: 10px;
+}
+
+/* =====================================================================
+   11. TICKETS
+   --------------------------------------------------------------------- */
+
+.requestor-type-operator {
+    background-color: #045380;
+}
+
+.requestor-type-owner {
+    background-color: #0c6a0c;
+    font-weight: bold;
+}
+
+.requestor-type-guest {
+    background-color: #58a;
+    font-weight: bold;
+}
+
+.requestor-type-subaccount {
+    background-color: #444;
+    font-weight: bold;
+}
+
+.ticketlastreply {
+    color: #5f8653 !important;
+    font-weight: 600;
+}
+
+.md-editor {
+    border-color: var(--color-dark-6) !important;
+}
+
+.md-editor > .md-preview,
+.md-editor > textarea {
+    background-color: var(--color-dark-4) !important;
+    border-color: var(--color-border-2) !important;
+    color: var(--color-text) !important;
+}
+
+.md-editor > textarea:focus {
+    background-color: var(--color-dark-3) !important;
+}
+
+.md-header.btn-toolbar,
+.md-footer {
+    background: var(--color-dark) !important;
+}
+
+.ticket-reply-submit-options,
+.ticket-reply-edit-options {
+    background-color: var(--color-dark-3) !important;
+}
+
+.ticket-reply-submit-options .inner-container {
+    background-color: var(--color-dark-3) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+
+#prerepliescontainer #predefq,
+.predefined-replies-search input {
+    border-color: var(--color-border) !important;
+    background: var(--color-dark-4) !important;
+    color: var(--color-text) !important;
+}
+
+#prerepliescontainer .margin-top-bottom-20 {
+    background-color: var(--color-dark-4) !important;
+}
+
+#ticketreplies .reply {
+    background: var(--color-dark-2) !important;
+    border: 1px solid var(--color-dark-5) !important;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) !important;
+}
+
+#ticketreplies .reply .rightcol {
+    border-color: var(--color-dark-5) !important;
+}
+
+#ticketreplies .reply hr {
+    border-color: var(--color-dark-5) !important;
+}
+
+#ticketreplies .postedon {
+    border-bottom: 1px solid var(--color-dark-5) !important;
+    padding: 10px 20px !important;
+    color: var(--color-text-muted) !important;
+}
+
+#ticketreplies .reply.staff {
+    border-color: #303f4c !important;
+    background-color: #242f31 !important;
+}
+
+#ticketreplies .reply.staff hr {
+    border-color: #29393e !important;
+}
+
+#ticketreplies .reply.note {
+    background-color: #3a2a2f !important;
+    border: 1px dashed #6a4a50 !important;
+}
+
+#ticketreplies .reply.note .postedon {
+    color: #69a !important;
+    font-weight: bold;
+}
+
+#ticketreplies .message p,
+#ticketreplies .message {
+    color: #867f69 !important;
+    text-align: start !important;
+    unicode-bidi: plaintext !important;
+}
+
+#ticketreplies .ticketcontextlinks {
+    padding: 5px 10px 0 !important;
+}
+
+.postedon {
+    border-bottom: 1px solid var(--color-dark-5) !important;
+}
+
+.ticket-flag.priority-low    { color: #3496f2 !important; }
+.ticket-flag.priority-medium { color: #fc870b !important; }
+.ticket-flag.priority-high   { color: #ed333c !important; }
+
+/* Knowledge base preview */
+#kbContentPreview {
+    color: var(--color-text) !important;
+}
+
+/* =====================================================================
+   12. SYSTEM SETTINGS, APPS & INTEGRATIONS
+   --------------------------------------------------------------------- */
+
+.contentarea.theme-content-bg .theme-header,
+.system-settings-index a.setting,
+.system-settings-index a.setting .icon,
+.slide-tray,
+.setup-tasks ul li {
+    background: var(--color-dark-2) !important;
+    border-color: var(--color-dark-6) !important;
+    color: var(--color-text) !important;
+}
+
+.setup-links .link {
+    background-color: var(--color-dark-1) !important;
+    border: 1px solid #444 !important;
+}
+
+.setup-links .link:hover {
+    background-color: var(--color-dark) !important;
+}
+
+.system-settings-index a.setting .icon {
+    color: #929292 !important;
+}
+
+.system-settings-index a.setting:hover .icon,
+.system-settings-index a.setting .title {
+    color: #519ec9 !important;
+}
+
+.system-settings-index .setup-side-menu li.active a {
+    background-color: #283128 !important;
+}
+
+.system-settings-index .setup-category-title {
+    color: var(--color-heading) !important;
+}
+
+.system-settings-index .recently-visited,
+.system-settings-index .recently-visited ol a,
+.system-settings-index .recently-visited h3 {
+    color: var(--color-text-muted) !important;
+}
+
+.setup-tasks h2 {
+    color: var(--color-heading) !important;
+}
+
+.setup-tasks a {
+    color: var(--color-text) !important;
+}
+
+.apps-and-integrations .app-wrapper,
+.notification-providers,
+.inset-element-container {
+    background-color: var(--color-dark) !important;
+}
+
+.apps-and-integrations .app-wrapper .app .app-inner,
+.apps-and-integrations .app-wrapper .app.featured .app-inner {
+    background: var(--color-dark-4) !important;
+    border-color: var(--color-border-2) !important;
+    color: var(--color-text) !important;
+}
+
+.apps-and-integrations .aai-primary-nav a {
+    background-color: var(--color-dark-6) !important;
+    color: var(--color-gray-2) !important;
+    border-color: var(--color-dark-6) !important;
+}
+
+.apps-and-integrations h2,
+.apps-and-integrations h3 {
+    color: var(--color-heading) !important;
+}
+
+.app-info-modal .app-info-sidebar {
+    background: var(--color-dark-5) !important;
+}
+
+.signin-apps-container .app,
+.partner-box,
+.spotlight-tlds {
+    background-color: var(--color-dark-1) !important;
+    border: 1px solid #444 !important;
+    color: var(--color-text) !important;
+}
+
+.partner-box-blue {
+    background-color: #1e344a !important;
+}
+
+.notification-providers .provider,
+div.partner-logo,
+.spotlight-tlds span {
+    background-color: var(--color-dark-1) !important;
+    border: 1px solid #222 !important;
+}
+
+.tab-content .col-md-4 .text-center {
+    background: var(--color-dark-3) !important;
+}
+
+div#featured .text-muted {
+    background: var(--color-dark-3) !important;
+    padding: 10px 0;
+}
+
+div#all .clearfix {
+    background: transparent !important;
+}
+
+/* PhpInfo page */
+.whmcs-phpinfo table .e {
+    color: var(--color-text) !important;
+    background-color: var(--color-dark-4) !important;
+}
+
+.whmcs-phpinfo table .v,
+.whmcs-phpinfo table .vr {
+    color: var(--color-text) !important;
+    background-color: var(--color-dark-3) !important;
+}
+
+/* Module queue */
+.module-queue .entry {
+    background-color: var(--color-dark-3) !important;
+    border-bottom: 1px solid var(--color-dark-5) !important;
+}
+
+.module-queue .entry:nth-child(even) {
+    background-color: var(--color-dark-4) !important;
+}
+
+.module-queue-header {
+    padding: 10px;
+    font-weight: 700;
+    border-top: 1px solid var(--color-dark-5) !important;
+    border-bottom: 1px solid var(--color-dark-5) !important;
+}
+
+/* TLD import tool */
+.tld-import-step .tld-pricing > .local-pricing {
+    color: #4da54d !important;
+}
+
+.tld-import-step .tld-margin {
+    color: #ceb244 !important;
+    border-color: var(--color-border) !important;
+}
+
+/* Automation status */
+.automation-status .widget {
+    border: 1px solid #444 !important;
+}
+
+.automation-status .widget .info-container {
+    background: var(--color-dark) !important;
+}
+
+.automation-status .graph-container {
+    background-color: #999 !important;
+}
+
+.automation-status .calendar-container {
+    background-color: var(--color-dark-1) !important;
+}
+
+/* =====================================================================
+   13. DATE PICKER (daterangepicker)
+   --------------------------------------------------------------------- */
+
+.daterangepicker {
+    background: #252d3c !important;
+    border-color: #383f4e !important;
+    color: var(--color-text-strong) !important;
+}
+
+.daterangepicker:after {
+    border-bottom-color: #252d3c !important;
+}
+
+.daterangepicker.show-ranges.ltr .drp-calendar.left,
+.daterangepicker.show-ranges.ltr .drp-calendar.right,
+.daterangepicker .drp-calendar {
+    border-color: #383f4e !important;
+    background: inherit !important;
+}
+
+.calendar-table {
+    background: #252d3c !important;
+    border-color: #393f4e !important;
+}
+
+.drp-buttons {
+    border-color: #393f4e !important;
+}
+
+.daterangepicker td.off,
+.daterangepicker td.off.end-date,
+.daterangepicker td.off.in-range,
+.daterangepicker td.off.start-date {
+    background-color: var(--color-dark-6) !important;
+    border-color: transparent !important;
+    color: #999;
+}
+
+.daterangepicker td.in-range {
+    background-color: #44627b !important;
+    border-color: transparent !important;
+    color: var(--color-text-strong);
+    border-radius: 0;
+}
+
+.daterangepicker td.active,
+.daterangepicker td.active:hover {
+    background-color: #286090 !important;
+    border-color: transparent !important;
+    color: var(--color-white);
+}
+
+.daterangepicker td.available:hover,
+.daterangepicker th.available:hover {
+    background-color: #555 !important;
+    border-color: transparent !important;
+    color: var(--color-text-strong);
+}
+
+.daterangepicker .today {
+    font-weight: 700;
+    background-color: #3a4558 !important;
+    text-decoration: underline;
+}
+
+/* =====================================================================
+   14. DROPDOWNS (Bootstrap)
+   --------------------------------------------------------------------- */
+
+.dropdown-menu {
+    background: var(--color-dark-3) !important;
+    border-color: var(--color-border) !important;
+}
+
+.dropdown-menu > li > a {
+    color: var(--color-text) !important;
+}
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus {
+    background: var(--color-dark-5) !important;
+    color: var(--color-text-strong) !important;
+}
+
+.dropdown-menu .divider {
+    background-color: var(--color-border) !important;
+}
+
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:focus,
+.dropdown-menu > .active > a:hover {
+    background-color: var(--color-blue) !important;
+    color: var(--color-white) !important;
+}
+
+/* =====================================================================
+   15. MERGE FIELDS, MISC
+   --------------------------------------------------------------------- */
+
+div#mergefields td {
+    color: #9393a0 !important;
+}
+
+div#mergefields a:hover {
+    text-decoration: underline !important;
+}
+
+.divider {
+    background-color: var(--color-dark-6) !important;
+}
+
+.textblack {
+    color: #b0953a !important;
+}
+
+a[style="color:#cc0000;"],
+a[style="color:#cc0000"] {
+    color: #cc6666 !important;
+}
+
+a[style="color: #006633;"],
+a[style="color: #006633"],
+a[style="color:#006633"] {
+    color: #6fba70 !important;
+}
+
+/* Generic inline-styled light backgrounds from legacy WHMCS code.
+   Be cautious: this is a broad selector, list specific values to override. */
+div[style*="background-color:#f8f8f8"],
+div[style*="background-color:#f6f6f6"] {
+    background-color: var(--color-dark-4) !important;
+}
+
+div[style*="border:2px solid #f6f6f6"] {
+    border: none !important;
+}
+
+/* Staff board notices - WHMCS uses color-coded classes (white/blue/yellow/
+   red/green/pink/purple) on sticky-note divs. Two contexts:
+   - Dashboard widget: <div class="staffboardnotices"><div class="blue">...
+   - Editor module:    <div class="note blue">...
+   Both covered. Source: modules/addons/staffboard/css/jquery.staffboard.css
+   defines all 7 color classes; our earlier rules only covered 5. */
+
+.staffboardnotices {
+    color: var(--color-text-strong);
+}
+
+.staffboardnotices div.white,
+.staffboardnotices div.blue,
+.staffboardnotices div.yellow,
+.staffboardnotices div.red,
+.staffboardnotices div.green,
+.staffboardnotices div.pink,
+.staffboardnotices div.purple,
+.note.white,
+.note.blue,
+.note.yellow,
+.note.red,
+.note.green,
+.note.pink,
+.note.purple {
+    color: var(--color-text-strong) !important;
+    border: 1px solid var(--color-border) !important;
+}
+
+.staffboardnotices div.white,
+.note.white  { background-color: var(--color-dark-5) !important; }
+
+.staffboardnotices div.blue,
+.note.blue   { background-color: #1f3a52 !important; }
+
+.staffboardnotices div.yellow,
+.note.yellow { background-color: var(--status-yellow-bg) !important; }
+
+.staffboardnotices div.red,
+.note.red    { background-color: #4a2020 !important; }
+
+.staffboardnotices div.green,
+.note.green  { background-color: #1f4020 !important; }
+
+.staffboardnotices div.pink,
+.note.pink   { background-color: #4a2840 !important; }
+
+.staffboardnotices div.purple,
+.note.purple { background-color: #2e2a4a !important; }
+
+.staffboardnotices div a,
+.note .author a {
+    color: var(--color-link-hover) !important;
+}
+
+.note .author {
+    color: var(--color-text-dim) !important;
+}
+
+/* ---------------------------------------------------------------------
+   ThickBox modal (jquery.thickbox - used by staffboard "Edit note" and
+   "Add note" popups, possibly other legacy modules).
+   ---------------------------------------------------------------------
+   Source: modules/addons/staffboard/css/jquery.staffboard.css bundles
+   ThickBox's default styles directly. Defaults are:
+     #TB_window       bg #fff, border #525252, text #000
+     #TB_title        bg #e8e8e8 (the gray top bar)
+     #TB_window a     #666 on all states
+     h3.Title         #666 with #ddd bottom border
+   None of these have been dark-mode overridden previously.
+--------------------------------------------------------------------- */
+
+#TB_overlay.TB_overlayBG,
+.TB_overlayBG {
+    background-color: #000 !important;
+    opacity: 0.8 !important;
+}
+
+#TB_window {
+    background-color: var(--color-dark-2) !important;
+    color: var(--color-text) !important;
+    border: 4px solid var(--color-border) !important;
+}
+
+#TB_title {
+    background-color: var(--color-dark-3) !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+
+#TB_ajaxContent {
+    background-color: var(--color-dark-2) !important;
+    color: var(--color-text) !important;
+}
+
+#TB_window a,
+#TB_window a:link,
+#TB_window a:visited,
+#TB_window a:active,
+#TB_window a:focus {
+    color: var(--color-link) !important;
+}
+
+#TB_window a:hover {
+    color: var(--color-link-hover) !important;
+}
+
+/* h3.Title is the "Edit note" / "Add note" heading inside the modal.
+   Also used elsewhere? Grepping source says only staffboard uses this
+   exact .Title class with h3, so scoping is fine. */
+#TB_ajaxContent h3.Title,
+.note-form h3.Title,
+h3.Title {
+    color: var(--color-text-strong) !important;
+    border-bottom: 1px solid var(--color-border) !important;
+}
+
+/* The note edit textarea - .pr-body is used specifically for this.
+   WHMCS doesn't explicitly style it so it inherits the browser default
+   (white bg, black text). We need to push dark. */
+.note-form textarea.pr-body,
+textarea.pr-body {
+    background-color: var(--color-dark-4) !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border) !important;
+}
+
+.note-form label {
+    color: var(--color-text-strong) !important;
+}
+
+.note-form select {
+    background-color: var(--color-dark-4) !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border) !important;
+}
+
+/* Reports link override */
+a#Menu-Reports-Billable_Ticket {
+    color: var(--color-text-strong) !important;
+}
+
+/* =====================================================================
+   16. THIRD-PARTY MODULES
+   --------------------------------------------------------------------- */
+
+/* rs-module (ResellersPanel or similar branded modules) */
+#rs-module .app-main__body,
+#rs-module .app-main__header,
+#rs-module .navbar__menu {
+    background-color: var(--color-dark-2);
+}
+
+#rs-module .container,
+#rs-module .navbar--main,
+#rs-module .app-main,
+#rs-module .app-main__actions {
+    background-color: var(--color-dark-2) !important;
+    background: var(--color-dark-2) !important;
+}
+
+#rs-module .form-feedback,
+#rs-module .form-label,
+#rs-module .app {
+    color: #aaa !important;
+}
+
+#rs-module .dropdown__menu,
+#whmcs .dropdown__menu {
+    background-color: var(--color-dark-5);
+}
+
+#rs-module .dataTables_wrapper.no-footer .t-c__footer {
+    background-color: var(--color-dark-5) !important;
+}
+
+#rs-module .dataTables_wrapper .t-c__footer .pagination__item.is-active {
+    color: var(--color-text-strong) !important;
+    background: var(--color-blue-3) !important;
+}
+
+/* Layers/LU module */
+.lu-app,
+.lu-navbar {
+    background: var(--color-dark-5) !important;
+    color: var(--color-white) !important;
+}
+
+.lu-widget {
+    background: var(--color-dark-5) !important;
+    color: #679 !important;
+}
+
+#layers-body .lu-alert--outline,
+#layers .lu-alert--outline {
+    background: var(--color-dark) !important;
+}
+
+#layers-body .lu-alert--outline.lu-alert--danger,
+#layers .lu-alert--outline.lu-alert--danger {
+    color: #a55656 !important;
+    border-color: #a55656 !important;
+}
+
+#layers pre {
+    background: var(--color-dark-6) !important;
+    color: var(--color-text) !important;
+}
+
+#layers .lu-btn--primary  { color: var(--color-white) !important; }
+#layers .lu-btn--success  { color: #000 !important; }
+
+#layers .lu-badge--outline.lu-badge--default {
+    color: var(--color-white) !important;
+}
+
+#layers .lu-table tbody th,
+#layers .lu-table tbody td,
+#layers .lu-table tfoot th,
+#layers .lu-table tfoot td {
+    font-size: 15px !important;
+}
+
+#layers .lu-table thead tr td,
+#layers .lu-table thead tr th {
+    font-size: 1.75rem;
+}
+
+#layers .lu-nav--md .lu-nav__link,
+#layers .lu-nav .lu-nav--sub.lu-nav--md .lu-nav__link {
+    font-size: 17px !important;
+    font-weight: bold !important;
+}
+
+/* WB AvaTax tab styling */
+.wbavatax_tabs #tabs ul li > a,
+.wbavatax_tabs #tabs ul li > a:visited,
+.wbavatax_tabs #tabs ul li > a:hover {
+    background-color: var(--color-dark-5);
+    color: var(--color-text-strong);
+}
+
+/* "ai-*-dropdown" dropdowns (some ai-module uses these) */
+div[class^="ai-"][class$="-dropdown"] {
+    background: var(--color-dark) !important;
+}
+
+div[class^="ai-"][class$="-dropdown"] a {
+    color: var(--color-white) !important;
+    background: transparent !important;
+}
+
+div[class^="ai-"][class$="-dropdown"] a:hover {
+    background: var(--color-dark-4) !important;
+    color: var(--color-white) !important;
+}
+
+/* =====================================================================
+   17. EMAIL PREVIEW IFRAME (dark-mode-safe blending)
+   --------------------------------------------------------------------- */
+
+body.modal-open .whmcs-modal#modalAjax .modal-body iframe#emailContent {
+    background-color: rgba(240, 255, 255, 0.3);
+    mix-blend-mode: lighten;
+    filter: brightness(1.4);
+    isolation: isolate;
+}
+
+/* =====================================================================
+   18. ANIMATIONS
+   --------------------------------------------------------------------- */
+
+@keyframes tada {
+    0%   { transform: scale3d(1, 1, 1); }
+    10%, 20%              { transform: scale3d(1, 1, 1) rotate3d(0, 0, 1, -1.5deg); }
+    30%, 50%, 70%, 90%    { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 1.5deg); }
+    40%, 60%, 80%         { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -1.5deg); }
+    100% { transform: scale3d(1, 1, 1); }
+}
+
+/* =====================================================================
+   19. DTDT-INJECTED NAVBAR WIDGETS - dark-mode overrides
+   ---------------------------------------------------------------------
+   Base sizing and always-needed colors for these widgets live in the
+   inline <style> block emitted by hooks.php (so they apply in both
+   modes). The rules below are the dark-mode-specific layer: hover
+   states, token-backed colors that only exist when this stylesheet is
+   loaded.
+   --------------------------------------------------------------------- */
+
+.dtdt-tickets-nav .dtdt-tickets-count {
+    color: var(--status-red-text);
+    animation: tada 1s both infinite;
+}
+
+/* ---- Theme toggle button - dark-mode hover behavior ---- */
+
+.dtdt-nav-toggle:hover .theme-toggle-container {
+    background-color: var(--color-dark-4);
+}
+
+.dtdt-nav-toggle .theme-toggle-icon {
+    color: var(--color-text-strong);
+}
+
+.dtdt-nav-toggle:hover .theme-toggle-icon {
+    color: var(--color-link);
+}

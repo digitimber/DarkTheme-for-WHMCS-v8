@@ -1,0 +1,49 @@
+{
+    "schema": "1.0",
+    "type": "whmcs-addons",
+    "name": "dtdt",
+    "version": "1.0.0",
+    "license": "GPL-3.0-or-later",
+    "category": "utilities",
+    "premium": "false",
+    "description": {
+        "name": "DigiTimber DarkTheme (DTDT) for WHMCS",
+        "tagline": "Dark mode for the WHMCS Blend admin theme.",
+        "long": "Comprehensive dark theme for the WHMCS Blend admin theme, covering WHMCS 8+ core, Layers dashboard, Lagom 2 client framework surfaces, staffboard module and inline-style status colors. Token-driven CSS - reskin the whole theme by editing :root. Derived from WevrLabs' Blend Dark Mode (GPL-3.0).",
+        "features": [
+            "Full dark UI for the Blend admin theme.",
+            "CSS variable token system - 67 tokens for easy reskinning.",
+            "Optional dark/light toggle per admin - preference remembered in browser, first-time visitors get their OS preference.",
+            "Optional date/time widget in the top nav bar.",
+            "Optional open-ticket-count badge in the top nav bar.",
+            "custom.css override file that survives module updates.",
+            "Automatic cache-busting on CSS updates."
+        ]
+    },
+    "logo": {
+        "filename": "logo.png"
+    },
+    "support": {
+        "homepage": "https://www.digitimber.com",
+        "learn_more": "https://www.digitimber.com",
+        "email": "whmcs@digitimber.com"
+    },
+    "authors": [
+        {
+            "name": "Digitimber",
+            "homepage": "https://www.digitimber.com"
+        }
+    ],
+    "credits": [
+        {
+            "name": "WevrLabs Hosting",
+            "homepage": "https://wevrlabs.net",
+            "role": "Original Blend Dark Mode addon (GPL-3.0-licensed), source of the CSS foundation."
+        },
+        {
+            "name": "LoneStarDataRanch",
+            "homepage": "https://github.com/LoneStarDataRanch",
+            "role": "Proposed a dark/light toggle for the upstream WevrLabs project via an open pull request (Aug 2025, unmerged), which inspired the toggle implementation in this module."
+        }
+    ]
+}
