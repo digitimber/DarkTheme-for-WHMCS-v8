@@ -1159,6 +1159,22 @@ select {
     color: var(--color-text) !important;
 }
 
+/* The actual <input type="text"> that Selectize injects inside
+   .selectize-input for user typing. Without this rule it inherits
+   browser defaults (dark text) which is invisible on our dark bg.
+   Needs to override any bootstrap .form-control rules targeting
+   bare inputs. */
+.selectize-input > input[type="text"],
+.selectize-input > input {
+    background: transparent !important;
+    color: var(--color-text-strong) !important;
+}
+
+.selectize-input > input::placeholder {
+    color: var(--color-text-muted) !important;
+    opacity: 1;
+}
+
 .selectize-dropdown,
 .selectize-dropdown.form-control {
     background: var(--color-dark-4) !important;

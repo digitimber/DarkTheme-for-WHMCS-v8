@@ -45,7 +45,7 @@ function dtdt_config()
                        . 'Optionally adds a per-admin dark/light toggle to the top nav bar.',
         'author'      => 'Digitimber',
         'language'    => 'english',
-        'version'     => '1.0.0',
+        'version'     => '1.0.1',
         'fields'      => [
             'datetime_enable' => [
                 'FriendlyName' => 'Display date and time on nav bar',

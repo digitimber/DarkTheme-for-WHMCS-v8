@@ -2,6 +2,11 @@
 
 All notable changes to this module are documented here.
 
+## [1.0.1] - 2026-04-24
+
+### Fixed
+- Selectize widgets (client search, CC recipients, and other type-to-search fields) now render typed text in a readable color. Previously the internal `<input>` element Selectize injects for user typing inherited browser-default text color, which rendered nearly invisible against the dark Selectize background. Added rules for `.selectize-input > input` (transparent background, strong text color) and its `::placeholder` (muted text color, full opacity).
+
 ## [1.0.0] - 2026-04-23
 
 First release of DigiTimber DarkTheme (DTDT). Derived from WevrLabs' Blend Dark Mode v3.1.1 (GPL-3.0-licensed upstream) with substantial rework and several new features. Licensed GPL-3.0-or-later, as required by the upstream license.
